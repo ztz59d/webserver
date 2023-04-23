@@ -3,7 +3,8 @@
 #include "my_thread.h"
 #include "http_conn.h"
 #include <thread>
-
+#include "log/log.hpp"
+#include <chrono>
 #define MAX_IOTHREADS 10
 
 int main(int argc, char *argv[])
@@ -53,6 +54,11 @@ int main(int argc, char *argv[])
         }
         printf("pp[0] : %d, pp[1] : %d\n", pp[i][0], pp[i][1]);
     }
+
+    log &logger = log::get_instance("logging_file");
+    std::thread *log_thread = new std::thread(&log::flush, &logger);
+    logger.LOG("INFO : system running");
+    // logger.LOG("INFO" + std::chrono::system_clock::now() + "system running");
 
     ret = listen(listenfd, 50);
     assert(ret >= 0);

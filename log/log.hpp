@@ -5,6 +5,10 @@
 #include <mutex>
 #include <condition_variable>
 #include <iostream>
+#include <chrono>
+#include <sstream>
+#include <iomanip>
+
 class log
 {
 private:
@@ -14,15 +18,35 @@ private:
     std::condition_variable cond;
     FILE *file;
 
+private:
+    log(){};
+    static log instance;
+
 public:
-    log(char *f) : file(fopen(f, "ab"))
+    static log &get_instance(char *f)
     {
-        if (file == NULL)
+        if (instance.file == NULL)
+        {
+            instance.file = fopen(f, "ab");
+        }
+        else
         {
             std::cout << "file open failed" << std::endl;
             exit(1);
         }
-    };
+        return instance;
+    }
+
+    static log &get_instance()
+    {
+        if (instance.file == NULL)
+        {
+            std::cout << "logger not init" << std::endl;
+            exit(1);
+        }
+        return instance;
+    }
+
     ~log() = default;
 
     inline void LOG(std::string &&line)
@@ -57,6 +81,12 @@ public:
             }
         }
     }
-};
 
+    // string &&time_to_str(std::chrono::system_clock::time_point &&time)
+    // {
+    //     std::string s = format("%FT%T", floor<seconds>(time));
+    //     return ss.str();
+    // }
+};
+log log::instance;
 #endif
